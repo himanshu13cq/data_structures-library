@@ -1,32 +1,11 @@
-Build Log 1
+Today I started Project 1 by creating the GitHub repository and setting up the folder structure. After that I worked on the Dynamic Array Design Proposal.
 
-Date: 06/07/2026
-Duration - 4:30 - 6:30
+Today I spent most of my time thinking about get() and operator[]. At first I thought both are doing the same thing because both are used to access an element from the array. After reading about operator overloading I understood that operator[] should return a reference so that elements can also be modified using arr[i] = value. I decided to keep get() separately because it can be used for safe access with bounds checking.
 
-Work Completed
-Created the GitHub repository data_structure_library for project 1.
-Set up the project structure with include, src, design_proposal and docs.
-Completed the Design Proposal.
-Designed the public API for the DynamicArray class.
-Documented all public methods along with their purpose.
-Wrote the design decisions explaining why heap memory, template programming, Rule of Three, automatic resizing and contiguous memory are used.
-Completed the complexity analysis for all public methods.
+I also spent time thinking about how the Dynamic Array should resize when it becomes full. I compared increasing the capacity by 1.5x, 2x and 2.5x. After reading about amortized analysis I understood why doubling the capacity is used in most implementations. It reduces the number of times resizing happens while still keeping memory usage reasonable.
 
-Problems Faced
- I was thinking about using operator[] overload to access element of array but there was also get() function.I also spend time thinking about the resizing strategy of the dynamic array whether to increase the size by 1.5x,2x or 2.5x
+Later I started working on the Linked List Design Proposal. While writing the memory management section I found a problem with using templates together with malloc() and free(). At first I thought malloc() should work for every data type, but then I learned that it only allocates raw memory and does not create an object.
 
-Solution
-Both functions operator[] and get() are going to be used.The get will be modified to give only the constant reference so that using it don't modify the element at index i.The operator will return the reference and using it access with modification is also possible it will give feel of using array.
-For resizing the array when size becomes equal capacity the doubling the capacity would be better choice it is most commonly used and provide a balance between memory space and append time.
+I spent some time understanding why this becomes a problem for classes like std::string. Since the constructor is never called, assigning a value to that memory can lead to undefined behaviour. After reading more I understood how placement new works. It constructs the object inside the memory already allocated by malloc(). Similarly, before calling free(), the destructor also needs to be called manually because free() only releases the memory.
 
-Date: 07/07/2026
-Duration: 9:30 - 11:30
-
-Work Completed
-Push the design_proposal along with memory_diagram for dynamic array into Github repo
-
-Problems Faced
-Using template with malloc and free will cause problem as malloc do not call a contructor when a user defined object like string is created.malloc() only allocates raw memory and does not create an actual object.Later when a value is assigned to that memory, the assignment operator would assume that a valid object already exists.Since the constructor was never called, the internal member of heap remain unintialized which can lead to undefined behaviour.
-
-
-
+Today I learned that allocating memory and creating an object are two different things. Earlier I used to think malloc() and new were doing the same work, but now I understand that new not only allocates memory but also calls the constructor, while malloc() only allocates raw bytes. This was probably the biggest thing I learned today.

@@ -1,0 +1,11 @@
+Today I started Project 1 by creating the GitHub repository and setting up the folder structure. After that I worked on the Dynamic Array Design Proposal.
+
+Today I spent most of my time thinking about get() and operator[]. At first I thought both are doing the same thing because both are used to access an element from the array. After reading about operator overloading I understood that operator[] should return a reference so that elements can also be modified using arr[i] = value. I decided to keep get() separately because it can be used for safe access with bounds checking.
+
+I also spent time thinking about how the Dynamic Array should resize when it becomes full. I compared increasing the capacity by 1.5x, 2x and 2.5x. After reading about amortized analysis I understood why doubling the capacity is used in most implementations. It reduces the number of times resizing happens while still keeping memory usage reasonable.
+
+Later I started working on the Linked List Design Proposal. While writing the memory management section I found a problem with using templates together with malloc() and free(). At first I thought malloc() should work for every data type, but then I learned that it only allocates raw memory and does not create an object.
+
+I spent some time understanding why this becomes a problem for classes like std::string. Since the constructor is never called, assigning a value to that memory can lead to undefined behaviour. After reading more I understood how placement new works. It constructs the object inside the memory already allocated by malloc(). Similarly, before calling free(), the destructor also needs to be called manually because free() only releases the memory.
+
+Today I learned that allocating memory and creating an object are two different things. Earlier I used to think malloc() and new were doing the same work, but now I understand that new not only allocates memory but also calls the constructor, while malloc() only allocates raw bytes. This was probably the biggest thing I learned today.

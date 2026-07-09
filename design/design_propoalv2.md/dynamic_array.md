@@ -119,6 +119,7 @@ All the elements from the previous array will be copied into the new array, the 
 | capacity() | O(1) | O(1) | O(1) | Returns the stored capacity variable. |
 | isEmpty() | O(1) | O(1) | O(1) | Checks whether `_size` is zero. |
 
+
 ---
 
 # Section 4 — Design Decisions
@@ -131,7 +132,7 @@ The Dynamic Array uses heap memory because its size is not known at compile time
 
 ## Automatic Resizing by Doubling Capacity
 
-Whenever the array becomes full the capacity will be doubled instead of increasing it by a fixed amount. Doubling reduces the number of resize operations and keeps the amortized complexity of `append()` equal to **O(1)** while maintaining a good balance between memory usage and performance.
+So in the append operation where the user is adding a new element at the end of the array, if the capacity is greater than the _size then there is no problem as there is space present in the allocated heap memory. But if _size becomes equal to the _capacity, then there is a need to resize the array. Resizing is done by allocating a new contiguous heap memory block with double the previous capacity. I have doubled the capacity because it provides a good balance between memory usage and performance. If the capacity is increased by a very small factor like 1.5x, resizing will happen more frequently, increasing the number of allocations and copy operations. On the other hand, increasing it by a very large factor like 2.5x will waste more heap memory because many allocated locations will remain unused. Therefore, doubling the capacity is the most commonly used strategy as it keeps the number of resize operations low while avoiding excessive memory wastage.
 
 ---
 
