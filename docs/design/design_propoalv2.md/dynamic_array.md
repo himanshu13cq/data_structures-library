@@ -43,7 +43,6 @@ public:
     int capacity() const;
 
     bool isEmpty() const;
-
 private:
 
     void resize();
