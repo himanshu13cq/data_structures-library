@@ -50,6 +50,7 @@ I decided that user defined key types should provide an overloaded `operator==` 
 - Added the design decisions explaining collision handling, rehashing and template programming.
 - Reviewed all three Design Proposals to keep the documentation format consistent.
 
+
 ### Problems Faced
 I was unsure whether the Hash Map should ask the user to provide a hash value directly or a hash function that generates the hash. I also wanted to understand how the STL solves this problem for custom types.
 

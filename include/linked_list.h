@@ -1,9 +1,6 @@
 #ifndef LL_H
 #define LL_H
 
-#include <iostream>
-#include <stdexcept>
-
 template<typename T>
 struct Node
 {
@@ -18,7 +15,7 @@ class LinkedList{
     private:
         Node<T>* head;
         Node<T>* tail;
-        int _size;
+        int m_size;
 
         Node<T>* createNode(const T &value);
         void destroyNode(Node<T>* node);
@@ -33,10 +30,13 @@ class LinkedList{
         void insertFront(const T &value);
         void insertBack(const T &value);
         void deleteFront();
-        void search(const T &value);
+        bool search(const T &value) const;
         void insert(int index,const T &value);
-
+        void deleteAt(int index);
+        void print() const;
+        const int size() const;
        
 };
 
+#include "linked_list.tpp"
 #endif

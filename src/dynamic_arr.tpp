@@ -4,7 +4,7 @@
 template<typename T>        //constructor
 DA<T>::DA()
 {
-    _size = 0;
+    m_size = 0;
     _capacity = 0;
     data = nullptr;
 }
@@ -13,7 +13,7 @@ DA<T>::DA()
 template<typename T>        //destructor
 DA<T>::~DA()
 {   
-    for(int i = 0;i < _size;i++)
+    for(int i = 0;i < m_size;i++)
     {
         data[i]. ~T();
     }
@@ -24,11 +24,11 @@ DA<T>::~DA()
 template<typename T>        //copy constructor
 DA<T>::DA(const DA &other)
 {
-    _size = other._size;
+    m_size = other.m_size;
     _capacity = other._capacity;
     data = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
         
-    for(int i = 0;i < _size; ++i)
+    for(int i = 0;i < m_size; ++i)
     {   
         new (&data[i]) T();
         data[i] = other.data[i];
@@ -44,17 +44,17 @@ DA<T>& DA<T>::operator=(const DA &other)
         return *this;
     }
 
-    for(int i = 0;i < _size; ++i)
+    for(int i = 0;i < m_size; ++i)
     {
         data[i].~T();
     }
     std::free(data);
 
-    _size = other._size;
+    m_size = other.m_size;
     _capacity = other._capacity;
     data = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
         
-    for(int i = 0;i < _size; ++i)
+    for(int i = 0;i < m_size; ++i)
     {   
         new (&data[i]) T();
         data[i] = other.data[i];
@@ -67,18 +67,18 @@ DA<T>& DA<T>::operator=(const DA &other)
 template<typename T>        //append
 void DA<T>::append(const T &value)
 {
-    if(_size == _capacity)
+    if(m_size == _capacity)
     {
         _capacity = _capacity * 2 + (_capacity? 0:1);
         T* ptr = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
 
-        for(int i = 0;i < _size; ++i)
+        for(int i = 0;i < m_size; ++i)
         {
             new (&ptr[i]) T();
             ptr[i] = data[i];
         }
             
-        for(int i = 0;i < _size; ++i)
+        for(int i = 0;i < m_size; ++i)
         {    
             data[i].~T();
         }
@@ -87,15 +87,15 @@ void DA<T>::append(const T &value)
            
     }
 
-    data[_size] = value;
-    _size++;
+    data[m_size] = value;
+    m_size++;
  }
 
 
 template<typename T>              //[]operator overload
 T& DA<T>::operator[](int index)
 {
-    if(index >= size_ || index < 0)
+    if(index >= m_size || index < 0)
     {
         std::cerr << "Index out of Bounds" << "\n";
         exit(1);
@@ -110,24 +110,24 @@ T& DA<T>::operator[](int index)
 template<typename T>
 void DA<T>::insert(int index,const T &value)
 {
-    if(index < 0 || index >= _size)
+    if(index < 0 || index >= m_size)
     {
         std::cerr << "Out of bound";
         exit(0);
     }
 
-    if(_size == _capacity)
+    if(m_size == _capacity)
     {
         _capacity = _capacity * 2 + (_capacity? 0:1);
         T* ptr = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
 
-        for(int i = 0;i < _size; ++i)
+        for(int i = 0;i < m_size; ++i)
         {
             new (&ptr[i]) T();
             ptr[i] = data[i];
         }
             
-        for(int i = 0;i < _size; ++i)
+        for(int i = 0;i < m_size; ++i)
         {    
             data[i].~T();
         }
@@ -135,35 +135,35 @@ void DA<T>::insert(int index,const T &value)
         data = ptr;
     }
 
-    for(int i = _size;i > index; --i)
+    for(int i = m_size;i > index; --i)
     {
         data[i] = data[i-1];
     }
     data[index] = value;
-    _size++;
+    m_size++;
 }
 
 template<typename T>
 void DA<T>::remove(int index)
 {
-    if(index < 0 || index >= _size)
+    if(index < 0 || index >= m_size)
     {
         std::cerr << "Index out of bounds";
         exit(0);
     }
 
-    for(int i = index;i < _size - 1; ++i){
+    for(int i = index;i < m_size - 1; ++i){
         data[i] = data[i+1];
     }
 
-    data[_size - 1].~T();
-    _size--;
+    data[m_size - 1].~T();
+    m_size--;
 }
 
 template<typename T>
 const T& DA<T>::get(int index) const
 {
-    if(index < 0 || index >= _size)
+    if(index < 0 || index >= m_size)
     {
         std::cerr << "Index out of bound";
         exit(0);
@@ -175,7 +175,7 @@ const T& DA<T>::get(int index) const
 template<typename T>
 int DA<T>::size() const
 {
-    return _size;
+    return m_size;
 }
 
 
@@ -189,5 +189,5 @@ int DA<T>::capacity() const
 template<typename T>
 bool DA<T>::isEmpty() const
 {
-    return _size == 0;
+    return m_size == 0;
 }

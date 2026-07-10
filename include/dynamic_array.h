@@ -6,7 +6,7 @@ class DA
 {
     private:
         T *data;
-        int _size;
+        int m_size;
         int _capacity;
             
     public:
