@@ -82,13 +82,13 @@ placement-new, rather than `new`:
 ```cpp
 Node<T>* createNode(const T& value) {
     Node<T>* node = static_cast<Node<T>*>(std::malloc(sizeof(Node<T>)));
-    new (node) Node<T>(value);   // placement new: construct T in raw memory
+    new (node) Node<T>(value);   
     return node;
 }
 
 void destroyNode(Node<T>* node) {
-    node->~Node<T>();            // explicitly call T's destructor
-    std::free(node);             // then release raw memory
+    node->~Node<T>();            
+    std::free(node);             
 }
 ```
 

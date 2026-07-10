@@ -27,5 +27,5 @@ class DA
         bool isEmpty() const;
                      
 };
-
+#include "dynamic_arr.tpp"
 #endif
