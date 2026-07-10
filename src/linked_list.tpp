@@ -4,7 +4,7 @@
 template<typename T>
 Node<T>* LinkedList<T>::createNode(const T& value)
 {
-    Node<T>* node = static_cast<Node<T>*>(std::malloc(sizeof(Node<T)));
+    Node<T>* node = static_cast<Node<T>*>(std::malloc(sizeof(Node<T>)));
     new (node) Node<T>(value);
     return node;
 }
@@ -118,18 +118,18 @@ void LinkedList<T>::deleteFront()
 }
 
 template<typename T>
-bool LinkedList<T>::search(const T &value) const
+T* LinkedList<T>::find(const T &value) const
 {
     Node<T>* node= head;
     while(node != nullptr)
     {
         if(node->data == value){
-            return true;
+            return &node->data;
         }
 
         node = node->next;
     }
-        return false;
+    return nullptr;
 }
 
 

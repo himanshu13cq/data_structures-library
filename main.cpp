@@ -1,5 +1,12 @@
-#include "dynamic_array.h"
+#include "hash_map.h"
+#include <iostream>
+using namespace std;
+
 int main()
 {
+    HashMap<int,int> hm;
+    cout << "created hash map ";
+
     
+    return 0;
 }
