@@ -22,6 +22,34 @@ class LinkedList{
     
     public:
 
+        class Iterator
+        {
+            private:
+                Node<T>* current;
+
+            public:
+                Iterator(Node<T>* node): current(node) {}
+
+                T& operator*()
+                {
+                    return current->data;
+                }
+
+                Iterator& operator++()
+                {
+                    current = current->next;
+                    return *this;
+                }
+
+                bool operator!=(const Iterator& other) const
+                {
+                    return current != other.current;
+                }
+            };
+        
+        Iterator begin() const;
+        Iterator end() const;
+
         LinkedList();
         ~LinkedList();
         LinkedList(const LinkedList& other);
@@ -32,6 +60,7 @@ class LinkedList{
         void deleteFront();
         T* find(const T &value) const;
         void insert(int index,const T &value);
+        bool deleteValue(const T& value);
         void deleteAt(int index);
         void print() const;
         const int size() const;

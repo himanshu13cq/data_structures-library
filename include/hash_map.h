@@ -26,12 +26,20 @@ class HashMap
         LinkedList<KV<K,V>>* buckets;
         
         size_t hash(const K &key) const;
+        V* find(const K &key);
+        void rehash();
 
     public:
         HashMap();
         ~HashMap();
+        HashMap(const HashMap& other);
+        HashMap& operator=(const HashMap& other);
         void insert(const K &key,const V &value);
-
+        V& get(const K &key);
+        bool contains(const K& key);
+        bool remove(const K& key);
+        int size() const;
+        bool isEmpty() const;
 
 };
 

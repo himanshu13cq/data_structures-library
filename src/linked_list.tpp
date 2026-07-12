@@ -64,6 +64,20 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other)
     return *this;
 }
 
+template<typename T>
+LinkedList<T>::LinkedList(const LinkedList<T>& other)
+{
+    head = nullptr;
+    tail = nullptr;
+    m_size = 0;
+
+    Node<T>* node = other.head;
+    while(node != nullptr)
+    {
+        insertBack(node->data);
+        node = node->next;
+    }
+}
 
 template<typename T>
 void LinkedList<T>::insertFront(const T &value)
@@ -217,3 +231,49 @@ const int LinkedList<T>::size() const
 }
 
 
+template<typename T>
+typename LinkedList<T>::Iterator LinkedList<T>::begin() const
+{
+    return Iterator(head);
+}
+
+template<typename T>
+typename LinkedList<T>::Iterator LinkedList<T>::end() const
+{
+    return Iterator(nullptr);
+}
+
+template<typename T>
+bool LinkedList<T>::deleteValue(const T &value)
+{
+    if(head == nullptr)
+    {
+        return false;
+    }
+
+    if(head->data == value)
+    {
+        deleteFront();
+        return true;
+    }
+    Node<T>* prev = head;
+    Node<T>* curr = head->next;
+    while(curr != nullptr)
+    {
+        if(curr->data == value)
+        {
+            prev->next = curr->next;
+            if(curr == tail)
+            {
+                tail = prev;
+            }
+            curr->next = nullptr;
+            destroyNode(curr);
+            m_size--;
+            return true;
+        }
+        prev = curr;
+        curr = curr->next;
+    }
+    return false;
+}
