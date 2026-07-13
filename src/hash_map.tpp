@@ -6,8 +6,8 @@
 #include <cstddef>
 #include <string>
 
-template<typename K,typename V>
-HashMap<K,V>::HashMap()
+template<typename K,typename V,typename H>
+HashMap<K,V,H>::HashMap()
 {
     m_size = 0;
     m_capacity = 8;
@@ -20,8 +20,8 @@ HashMap<K,V>::HashMap()
     }
 }
 
-template<typename K,typename V>
-HashMap<K,V>::~HashMap()
+template<typename K,typename V,typename H>
+HashMap<K,V,H>::~HashMap()
 {
     for(int i = 0;i < m_capacity; ++i)
     {
@@ -30,8 +30,8 @@ HashMap<K,V>::~HashMap()
     free(buckets);
 }
 
-template<typename K, typename V>
-HashMap<K,V>::HashMap(const HashMap<K,V>& other)
+template<typename K, typename V,typename H>
+HashMap<K,V,H>::HashMap(const HashMap<K,V,H>& other)
 {
     m_size = other.m_size;
     m_capacity = other.m_capacity;
@@ -43,8 +43,8 @@ HashMap<K,V>::HashMap(const HashMap<K,V>& other)
     }
 }
 
-template<typename K, typename V>
-HashMap<K,V>& HashMap<K,V>::operator=(const HashMap<K,V>& other)
+template<typename K, typename V,typename H>
+HashMap<K,V,H>& HashMap<K,V,H>::operator=(const HashMap<K,V,H>& other)
 {
     if(this == &other)
     {
@@ -68,30 +68,13 @@ HashMap<K,V>& HashMap<K,V>::operator=(const HashMap<K,V>& other)
     return *this;
 }
 
+template<typename K,typename V,typename H>
+size_t HashMap<K,V,H>::hash(const K &key) const{
+    return hasher(key);
+}
 
-template<typename K,typename V>
-size_t HashMap<K,V>::hash(const K &key) const{
-    if constexpr(std::is_integral<K>::value)
-    {
-        return static_cast<size_t>(key);
-    }
-    else if constexpr(std::is_same<K,std::string>::value)
-    {
-        size_t h = 0;
-        for(char c:key)
-        {
-            h = h * 31 + static_cast<unsigned char>(c);
-        }
-        return h;
-    }
-    else
-    {
-        static_assert(std::is_integral<K>::value || std::is_same<K,std::string>::value, "give only int and string");
-    }
-};
-
-template<typename K,typename V>
-V* HashMap<K,V>::find(const K &key)
+template<typename K,typename V,typename H>
+V* HashMap<K,V,H>::find(const K &key)
 {
     size_t index = hash(key) % m_capacity;
     KV<K,V> target(key,V());
@@ -105,8 +88,8 @@ V* HashMap<K,V>::find(const K &key)
     return nullptr;
 }
 
-template<typename K,typename V>
-void HashMap<K,V>::insert(const K &key,const V &value)
+template<typename K,typename V,typename H>
+void HashMap<K,V,H>::insert(const K &key,const V &value)
 {
     size_t index = hash(key) % m_capacity;
 
@@ -129,8 +112,8 @@ void HashMap<K,V>::insert(const K &key,const V &value)
     }
 }
 
-template<typename K,typename V>
-void HashMap<K,V>::rehash()
+template<typename K,typename V,typename H>
+void HashMap<K,V,H>::rehash()
 {
     int new_capacity = m_capacity * 2;
 
@@ -156,8 +139,8 @@ void HashMap<K,V>::rehash()
     m_capacity = new_capacity;
 }
 
-template<typename K,typename V>
-V& HashMap<K,V>::get(const K &key)
+template<typename K,typename V,typename H>
+V& HashMap<K,V,H>::get(const K &key)
 {
     V* found = find(key);
     if(found == nullptr)
@@ -168,14 +151,14 @@ V& HashMap<K,V>::get(const K &key)
     return *found;
 }
 
-template<typename K,typename V>
-bool HashMap<K,V>::contains(const K &key)
+template<typename K,typename V,typename H>
+bool HashMap<K,V,H>::contains(const K &key)
 {
     return find(key) != nullptr;
 }
 
-template<typename K, typename V>
-bool HashMap<K,V>::remove(const K &key)
+template<typename K, typename V,typename H>
+bool HashMap<K,V,H>::remove(const K &key)
 {
     size_t index = hash(key) % m_capacity;
     KV<K,V> target(key, V());
@@ -187,14 +170,14 @@ bool HashMap<K,V>::remove(const K &key)
     return removed;
 }
 
-template<typename K,typename V>
-int HashMap<K,V>::size() const
+template<typename K,typename V,typename H>
+int HashMap<K,V,H>::size() const
 {
     return m_size;
 }
 
-template<typename K,typename V>
-bool HashMap<K,V>::isEmpty() const
+template<typename K,typename V,typename H>
+bool HashMap<K,V,H>::isEmpty() const
 {
     return m_size == 0;
 }

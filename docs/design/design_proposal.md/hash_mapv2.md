@@ -108,7 +108,7 @@ When `hash(key) % m_capacity` produces the same index for two different keys, bo
 
 When `m_size / m_capacity` exceeds a load factor of `0.9`, `insert()` triggers `rehash()`: a new bucket array of double the capacity is allocated, then every existing entry (visited via each old bucket's `Iterator`) is re-hashed against the *new* capacity and reinserted, since an entry's correct bucket index depends on capacity. Every entry must be revisited — an entry's old index has no guaranteed relationship to its new one once capacity changes.
 
-![Hash Map Memory Layout](/design/memory_diagram/hash_map.jpg)
+![Hash Map Memory Layout](/docs/design/memory_diagram/hash_map.jpg)
 
 ---
 

@@ -79,6 +79,8 @@ An iterator is nothing more than a wrapper around "a position in the list" — h
 
 **`find()` and `deleteValue()` both rely on `T` supporting `operator==`.** Neither `LinkedList` nor `Node` define this — it's a requirement pushed onto whatever `T` is used for the list, deliberately kept that way so `LinkedList` itself stays fully generic and has no knowledge of what "equality" means for its stored type.
 
+![LinkedList Memory Layout](/docs/design/memory_diagram/linked_list.jpg)
+
 ---
 
 ## Section 3 — Complexity Estimates (additions)
