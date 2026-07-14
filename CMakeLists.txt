@@ -7,15 +7,31 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
-# 1. Define the executable FIRST so CMake knows it exists
+#-------------------------------------
 add_executable(main main.cpp)
 
 target_include_directories(main PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/src
 )
+#-------------------------------------
 
-# 2. Configure Valgrind to use the 'main' target
+#-----------------------------------------
+enable_testing()
+find_package(GTest REQUIRED)
+add_executable(unit_tests test/DynamicArray/DAinsert_test.cpp)
+
+target_include_directories(unit_tests PRIVATE
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
+)
+
+target_link_libraries(unit_tests PRIVATE GTest::gtest GTest::gtest_main)
+include(GoogleTest)
+gtest_discover_tests(unit_tests)
+
+#----------------------------------------
+
 find_program(VALGRIND_PROGRAM valgrind)
 if(VALGRIND_PROGRAM)
     message(STATUS "Valgrind found: ${VALGRIND_PROGRAM}")
@@ -32,3 +48,4 @@ if(VALGRIND_PROGRAM)
 else()
     message(WARNING "Valgrind not found! The 'valgrind' target will not be available.")
 endif()
+

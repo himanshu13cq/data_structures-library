@@ -1,12 +1,12 @@
 #ifndef HASH_MAP
 #define HASH_MAP
-
 #include "linked_list.h"
 #include "dynamic_array.h"
 #include <cstddef>
 #include <cstring>
 #include <cstdint>
 #include <type_traits>
+#include <string>
 
 template<typename K>
 struct DefaultHash
@@ -28,10 +28,17 @@ struct DefaultHash
         }
         else if constexpr(std::is_same<K,double>::value)
         {   
-            static_assert(sizeof(double) == sizeof(uint64_t));
+            static_assert(sizeof(double) == sizeof(uint64_t),"Doing hashing of double will create trouble");
             uint64_t bits;
             std::memcpy(&bits,&key,sizeof(double));
+            if constexpr(sizeof(size_t) < sizeof(uint64_t))
+            {
+                return static_cast<size_t>(bits ^ (bits >> 32));
+            }
+            else
+            {
             return static_cast<size_t>(bits);
+            }
         }
         else
         {   

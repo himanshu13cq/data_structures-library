@@ -1,4 +1,7 @@
 #include "linked_list.h"
+#include <cstdlib>
+#include <new>
+#include <stdexcept>
 #include <iostream>
 
 template<typename T>
@@ -116,8 +119,7 @@ void LinkedList<T>::deleteFront()
 {
     if(head == nullptr)
     {
-       std::cerr << "underflow";
-       exit(1);
+       throw std::out_of_range("Linked List is empty");
     }
            
     if(head->next == nullptr)
@@ -152,7 +154,7 @@ void LinkedList<T>::insert(int index,const T &value)
 {
     if(index > m_size)
     {
-        std::cerr << "Out of index";
+        throw std::out_of_range("Entered Index is out of bounds");
     }
 
     if(index == 0)
@@ -197,8 +199,7 @@ void LinkedList<T>::deleteAt(int index)
 {
     if(index >= m_size || index < 0)
     {
-        std::cerr<<"out of index";
-        exit(0);
+        throw std::out_of_range("Entered index is out of bounds");
     }
 
     if(index == 0)

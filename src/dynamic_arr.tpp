@@ -1,5 +1,7 @@
 #include "dynamic_array.h"
-#include <iostream>
+#include <stdexcept>
+#include <new>
+#include <cstdlib>
 
 template<typename T>        //constructor
 DA<T>::DA()
@@ -97,8 +99,7 @@ T& DA<T>::operator[](int index)
 {
     if(index >= m_size || index < 0)
     {
-        std::cerr << "Index out of Bounds" << "\n";
-        exit(1);
+        throw std::out_of_range("Entered index is out of bounds");
     }
     else
     {
@@ -110,10 +111,9 @@ T& DA<T>::operator[](int index)
 template<typename T>
 void DA<T>::insert(int index,const T &value)
 {
-    if(index < 0 || index >= m_size)
+    if(index < 0 || index > m_size)
     {
-        std::cerr << "Out of bound";
-        exit(0);
+        throw std::out_of_range("Entered Index is out of range");
     }
 
     if(m_size == _capacity)
@@ -148,8 +148,7 @@ void DA<T>::remove(int index)
 {
     if(index < 0 || index >= m_size)
     {
-        std::cerr << "Index out of bounds";
-        exit(0);
+        throw std::out_of_range("Entered index is out of range");
     }
 
     for(int i = index;i < m_size - 1; ++i){
@@ -165,8 +164,7 @@ const T& DA<T>::get(int index) const
 {
     if(index < 0 || index >= m_size)
     {
-        std::cerr << "Index out of bound";
-        exit(0);
+        throw std::out_of_range("Entered Index is out of range");
     }
 
     return data[index];

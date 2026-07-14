@@ -1,10 +1,6 @@
 #include "hash_map.h"
 #include "linked_list.h"
-#include <cstdlib>
-#include <new>
-#include <type_traits>
-#include <cstddef>
-#include <string>
+#include "dynamic_array.h"
 
 template<typename K,typename V,typename H>
 HashMap<K,V,H>::HashMap()
