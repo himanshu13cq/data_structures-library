@@ -87,7 +87,7 @@ void DA<T>::append(const T &value)
            
     }
 
-    data[m_size] = value;
+    new (&data[m_size]) T(value);
     m_size++;
  }
 

@@ -1,39 +1,70 @@
 # Build Log 5
 
-## Date: 10/07/2026
+## Date: 13/07/2026
 
 ### Session - 1
 
-## Research: Implementing `default_hash` for user-defined types
+### Work Completed
 
-When implementing a default hash function for a user-defined type, two common approaches are often considered:
+* Added a third template parameter to `HashMap` (`HashMap<Key, Value, Hasher = DefaultHash<Key>>`) so users can provide their own hash function for custom key types.
+* Moved the hashing logic for `int` and `std::string` from `HashMap::hash()` into a separate `DefaultHash<Key>` class.
+* Tested the HashMap with a custom key type (`HashMap<Employee, int, EmployeeHasher>`) and verified that insertion, updating, collision handling, and rehashing all worked correctly.
 
-1. Hash the object address.
-2. Hash the raw bytes of the object.
+### Problems Faced
 
-### Problem with using the object address
+After adding the third template parameter (`H`), I forgot to update a few member function definitions. The copy constructor, copy assignment operator, and `remove()` still used the old template declaration with only `K` and `V`, so the compiler didn't recognize `H`.
 
-- The address of an object is not stable across separate objects with the same value.
-- For user-defined types, two objects with equal fields can reside at different heap addresses.
-- This means the hash would differ for logically equal values, breaking the hash contract.
+### Solution
 
-### Problem with hashing raw bytes
+Added `typename H` to the missing `template<>` declarations. This reminded me that whenever I change a class's template parameters, I need to update every member function definition as well, not just the class declaration.
 
-Two main issues arise:
+---
 
-- Padding bytes: compiler-added padding inside structs or classes may contain indeterminate data.
-  - These padding bytes can differ between otherwise equal objects.
-  - Hashing raw memory can therefore produce different results for equal values.
-- Dynamic allocation: if the type contains pointers or owning resources (like `std::string`, `std::vector`, or other heap allocations), hashing the raw object memory does not account for the pointed-to data.
-  - The raw bytes only include pointer values, not the contents of the dynamically allocated memory.
-  - As a result, different objects with equal deep content can yield different hashes.
+## Date: 13/07/2026
 
-### Conclusion
+### Session - 2
 
-A safe default hash for user-defined types should:
+### Work Completed
 
-- Use field-by-field hashing of the logical value.
-- Avoid hashing addresses.
-- Avoid hashing raw bytes directly when the type contains padding or dynamic data.
+* Added support for hashing `double` values by hashing their actual bit representation instead of converting them to integers.
+* Compared different ways of hashing floating-point numbers and learned why directly casting them to `size_t` is not a good idea.
+* Explored different ways to support user-defined key types.
 
-This research motivates implementing `default_hash` as a composition of hashes for each relevant member rather than relying on object addresses or raw memory dumps.
+### Problems Faced
+
+I wanted the HashMap to work with any key type without forcing the user to always write a custom hash function.
+
+### Solution
+
+I decided to use hash-by-address as a fallback for unsupported types. This allows the HashMap to work, but two different objects with the same data will still hash differently unless the user provides a proper custom hasher.
+
+I also added a compile-time check to make sure the key type supports `operator==`. Since I used a `requires` expression for this, I upgraded the project from C++17 to C++20.
+
+---
+
+## Date: 13/07/2026
+
+### Session - 3
+
+### Work Completed
+
+* Found and fixed a bug in `DynamicArray::append()`.
+* Changed `append()` and the resize logic to use placement `new` instead of assigning into unconstructed memory.
+* Replaced the manually managed bucket array in `HashMap` with `DA<LinkedList<KV<Key, Value>>>`.
+* Simplified the HashMap constructor, destructor, copy constructor, copy assignment operator, and `rehash()` because `DynamicArray` now manages the bucket memory.
+
+### Problems Faced
+
+The bug in `DynamicArray` didn't appear when storing simple types like `int`, but it showed up when storing `LinkedList` objects. The code was assigning to memory before the object had been constructed, which caused crashes.
+
+While refactoring `HashMap`, I also accidentally destroyed the same `LinkedList` objects twice. `rehash()` manually called the destructor, but `DynamicArray::operator=` was already destroying those objects during assignment.
+
+I also made a template syntax mistake by forgetting a closing `>` in a nested template declaration, which produced confusing compiler errors.
+
+### Solution
+
+Fixed `append()` by constructing new objects directly with placement `new` instead of assigning into raw memory. After the fix, storing `LinkedList` objects inside `DynamicArray` worked correctly.
+
+Removed the manual destructor calls from `rehash()` and let `DynamicArray` manage object destruction on its own. This avoided calling the destructor twice and made the code cleaner.
+
+For the template syntax error, I carefully checked the matching angle brackets and corrected the missing `>`. This reminded me to slow down and verify nested template declarations whenever they become more complex.

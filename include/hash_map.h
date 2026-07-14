@@ -2,6 +2,7 @@
 #define HASH_MAP
 
 #include "linked_list.h"
+#include "dynamic_array.h"
 #include <cstddef>
 #include <cstring>
 #include <cstdint>
@@ -33,8 +34,9 @@ struct DefaultHash
             return static_cast<size_t>(bits);
         }
         else
-        {
-            static_assert(std::is_integral<K>::value||std::is_same<K,std::string>::value,"No hasher");
+        {   
+            static_assert(requires(K a,K b) {{a==b} -> std::convertible_to<bool>;},"the user defined object should have a == operator overload");
+            return reinterpret_cast<size_t>(&key);
         }
     }
 };
@@ -58,7 +60,7 @@ class HashMap
     private:
         int m_size;
         int m_capacity;
-        LinkedList<KV<K,V>>* buckets;
+        DA<LinkedList<KV<K,V>>> buckets;
         H hasher; 
         
         size_t hash(const K &key) const;

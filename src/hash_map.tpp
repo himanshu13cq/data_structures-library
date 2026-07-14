@@ -12,22 +12,15 @@ HashMap<K,V,H>::HashMap()
     m_size = 0;
     m_capacity = 8;
     
-    buckets = static_cast<LinkedList<KV<K,V>>*>(std::malloc(sizeof(LinkedList<KV<K,V>>) * m_capacity));
-    
     for(int i = 0;i < m_capacity; ++i)
     {   
-        new (&buckets[i]) LinkedList<KV<K,V>>();
+        buckets.append(LinkedList<KV<K,V>>());
     }
 }
 
 template<typename K,typename V,typename H>
 HashMap<K,V,H>::~HashMap()
 {
-    for(int i = 0;i < m_capacity; ++i)
-    {
-        buckets[i].~LinkedList<KV<K,V>>();
-    }
-    free(buckets);
 }
 
 template<typename K, typename V,typename H>
@@ -36,35 +29,15 @@ HashMap<K,V,H>::HashMap(const HashMap<K,V,H>& other)
     m_size = other.m_size;
     m_capacity = other.m_capacity;
 
-    buckets = static_cast<LinkedList<KV<K,V>>*>(std::malloc(sizeof(LinkedList<KV<K,V>>) * m_capacity));
-    for(int i = 0; i < m_capacity; ++i)
-    {
-        new (&buckets[i]) LinkedList<KV<K,V>>(other.buckets[i]);
-    }
+    buckets = other.buckets;
 }
 
 template<typename K, typename V,typename H>
 HashMap<K,V,H>& HashMap<K,V,H>::operator=(const HashMap<K,V,H>& other)
 {
-    if(this == &other)
-    {
-        return *this;
-    }
-
-    for(int i = 0; i < m_capacity; ++i)
-    {
-        buckets[i].~LinkedList<KV<K,V>>();
-    }
-    std::free(buckets);
-
+    buckets = other.buckets;
     m_size = other.m_size;
     m_capacity = other.m_capacity;
-    buckets = static_cast<LinkedList<KV<K,V>>*>(std::malloc(sizeof(LinkedList<KV<K,V>>) * m_capacity));
-    for(int i = 0; i < m_capacity; ++i)
-    {
-        new (&buckets[i]) LinkedList<KV<K,V>>(other.buckets[i]);
-    }
-
     return *this;
 }
 
@@ -117,11 +90,10 @@ void HashMap<K,V,H>::rehash()
 {
     int new_capacity = m_capacity * 2;
 
-    LinkedList<KV<K,V>>* newBuckets = static_cast<LinkedList<KV<K,V>>*>(std::malloc(sizeof(LinkedList<KV<K,V>>) * new_capacity));
-
+    DA<LinkedList<KV<K,V>>> newBuckets; 
     for(int i = 0;i < new_capacity; ++i)
     {
-        new (&newBuckets[i]) LinkedList<KV<K,V>>();
+        newBuckets.append(LinkedList<KV<K,V>>());
     }
 
     for(int i = 0;i < m_capacity; ++i)
@@ -131,9 +103,7 @@ void HashMap<K,V,H>::rehash()
             size_t index = hash(kv.key) % new_capacity;
             newBuckets[index].insertBack(kv);
         }
-        buckets[i].~LinkedList<KV<K,V>>();
     }
-    std::free(buckets);
 
     buckets = newBuckets;
     m_capacity = new_capacity;

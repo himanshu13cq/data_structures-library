@@ -24,10 +24,26 @@ struct abchasher
     
 };
 
+struct point{
+    int a;
+    int b;
+    point(int x,int y): a(x), b(y) {}
+
+    bool operator==(const point &other) const
+    {
+        return this->a == other.a;
+    }
+};
+
 int main()
 {   
+    point bita(10,34);
 
-    HashMap<abc,int,abchasher> hm1;
+    HashMap<point,int> hm2;
+    //HashMap<ad,ad,gemr.jwr
+    hm2.insert(bita,26);
+    cout << hm2.get(bita) <<endl;
+    /*HashMap<abc,int,abchasher> hm1;
     abc alpha(10,20);
     hm1.insert(alpha,899);
     HashMap<int,int> hm;
@@ -37,6 +53,6 @@ int main()
     {
         hm.insert(i,i*10);
     }
-    cout << hm.get(3) <<endl;
+    cout << hm.get(3) <<endl; */
     return 0;
 }
