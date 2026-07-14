@@ -8,7 +8,7 @@ class DA
         T *data;
         int m_size;
         int _capacity;
-            
+        void grow();
     public:
         DA();                              
         ~DA();                            

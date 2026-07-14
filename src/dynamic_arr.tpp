@@ -65,28 +65,32 @@ DA<T>& DA<T>::operator=(const DA &other)
     return *this;
 }
 
+template<typename T>
+void DA<T>::grow()
+{
+    _capacity = _capacity * 2 + (_capacity? 0:1);
+    T* ptr = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
+
+    for(int i = 0;i < m_size; ++i)
+    {
+        new (&ptr[i]) T();
+        ptr[i] = data[i];
+    }
+            
+    for(int i = 0;i < m_size; ++i)
+    {    
+        data[i].~T();
+    }
+    std::free(data);
+    data = ptr;
+}
 
 template<typename T>        //append
 void DA<T>::append(const T &value)
 {
     if(m_size == _capacity)
     {
-        _capacity = _capacity * 2 + (_capacity? 0:1);
-        T* ptr = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
-
-        for(int i = 0;i < m_size; ++i)
-        {
-            new (&ptr[i]) T();
-            ptr[i] = data[i];
-        }
-            
-        for(int i = 0;i < m_size; ++i)
-        {    
-            data[i].~T();
-        }
-        std::free(data);
-        data = ptr;
-           
+        grow();   
     }
 
     new (&data[m_size]) T(value);
@@ -118,28 +122,22 @@ void DA<T>::insert(int index,const T &value)
 
     if(m_size == _capacity)
     {
-        _capacity = _capacity * 2 + (_capacity? 0:1);
-        T* ptr = static_cast<T*>(std::malloc(_capacity * sizeof(T)));
-
-        for(int i = 0;i < m_size; ++i)
-        {
-            new (&ptr[i]) T();
-            ptr[i] = data[i];
-        }
-            
-        for(int i = 0;i < m_size; ++i)
-        {    
-            data[i].~T();
-        }
-        std::free(data);
-        data = ptr;
+        grow();
     }
 
-    for(int i = m_size;i > index; --i)
+    if(m_size > index)
     {
-        data[i] = data[i-1];
+        for(int i = m_size;i > index; --i)
+        {
+            data[i] = data[i-1];
+        }
+        data[index] = value;
     }
-    data[index] = value;
+    else
+    {
+        new (&data[index]) T(value);
+    }
+    
     m_size++;
 }
 

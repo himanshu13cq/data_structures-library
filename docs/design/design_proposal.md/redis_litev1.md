@@ -243,7 +243,7 @@ Reusing the existing `HashMap` also demonstrates code reusability and avoids imp
 
 ---
 
-## 2. Using a REPL Instead of Reading a Single Command
+## 2. Using a REPL
 
 Redis Lite uses a REPL (Read-Evaluate-Print Loop), allowing the user to continuously enter commands without restarting the application.
 
@@ -278,9 +278,7 @@ The first token represents the command, while the remaining tokens represent its
 
 This makes command parsing simple and allows every handler function to receive input in the same format.
 
-**Alternative Considered**
 
-Parsing the command directly from the input string using multiple substring operations would make the code more complicated and harder to extend.
 
 ---
 

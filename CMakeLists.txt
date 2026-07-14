@@ -19,7 +19,18 @@ target_include_directories(main PRIVATE
 #-----------------------------------------
 enable_testing()
 find_package(GTest REQUIRED)
-add_executable(unit_tests test/DynamicArray/DAinsert_test.cpp)
+add_executable(unit_tests 
+            test/DynamicArray/DAinsert_test.cpp
+            test/DynamicArray/DAappend_test.cpp
+            test/DynamicArray/DAremove_test.cpp
+            test/DynamicArray/DAget_test.cpp
+            test/DynamicArray/DA[]_test.cpp
+            test/DynamicArray/DAisempt_test.cpp
+            test/DynamicArray/DAsize_test.cpp
+            test/DynamicArray/DAcap_test.cpp
+            test/DynamicArray/DAcopy_test.cpp
+            test/DynamicArray/DA=_test.cpp
+)
 
 target_include_directories(unit_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/include
