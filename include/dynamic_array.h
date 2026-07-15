@@ -13,7 +13,7 @@ class DA
         DA();                              
         ~DA();                            
         DA(const DA &other);    
-        DA& operator=(const DA &other);     
+        DA& operator=(const DA &other);
 
         void append(const T &value);       
         void insert(int index, const T &value);
@@ -21,6 +21,7 @@ class DA
         const T& get(int index) const;
 
         T& operator[](int index);
+        const T& operator[](int index) const;
 
         int size() const;
         int capacity() const;

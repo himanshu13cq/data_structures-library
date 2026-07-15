@@ -150,3 +150,13 @@ bool HashMap<K,V,H>::isEmpty() const
 {
     return m_size == 0;
 }
+
+template<typename K,typename V,typename H>
+void HashMap<K,V,H>::clear()
+{
+    for(int i = 0;i < m_capacity; ++i)
+    {
+        buckets[i].clear();
+    }
+    m_size = 0;
+}

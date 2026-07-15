@@ -63,8 +63,8 @@ class LinkedList{
         bool deleteValue(const T& value);
         void deleteAt(int index);
         void print() const;
-        const int size() const;
-       
+        int size() const;
+        void clear();
 };
 
 #include "linked_list.tpp"

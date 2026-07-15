@@ -85,6 +85,7 @@ class HashMap
         bool remove(const K& key);
         int size() const;
         bool isEmpty() const;
+        void clear();
 
 };
 

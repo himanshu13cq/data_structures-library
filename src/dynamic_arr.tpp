@@ -111,7 +111,11 @@ T& DA<T>::operator[](int index)
     }
 }
 
-
+template<typename T>
+const T& DA<T>::operator[](int index) const
+{
+    return data[index];
+}
 template<typename T>
 void DA<T>::insert(int index,const T &value)
 {

@@ -33,12 +33,7 @@ LinkedList<T>::LinkedList()
 template<typename T>
 LinkedList<T>::~LinkedList()
 {
-    while(head != nullptr){
-        Node<T>* node = head;
-        head = head->next;
-        destroyNode(node);
-    }
-    tail = nullptr;
+    clear();
 }
 
 
@@ -49,14 +44,7 @@ LinkedList<T>& LinkedList<T>::operator=(const LinkedList<T>& other)
         return *this;
     }   
 
-    while(head != nullptr)
-    {
-       Node<T>* temp = head;
-       head = head -> next;
-       destroyNode(temp);
-    }
-    tail = nullptr;
-    m_size = 0;
+    clear();
 
     Node<T>* node = other.head;
     while(node != nullptr)
@@ -226,7 +214,7 @@ void LinkedList<T>::deleteAt(int index)
 
 
 template<typename T>
-const int LinkedList<T>::size() const
+int LinkedList<T>::size() const
 {
     return m_size;
 }
@@ -277,4 +265,16 @@ bool LinkedList<T>::deleteValue(const T &value)
         curr = curr->next;
     }
     return false;
+}
+
+template<typename T>
+void LinkedList<T>::clear()
+{
+     while(head != nullptr){
+        Node<T>* node = head;
+        head = head->next;
+        destroyNode(node);
+    }
+    tail = nullptr;
+    m_size = 0;
 }

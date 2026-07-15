@@ -8,54 +8,59 @@ void RedisLite::run()
 {
     while(true)
     {
-        cout << "Enter the command:\n";
+        cout << "Enter the command:\n>";
         string line;
-        getline(cin,line);
+
+        if(!getline(cin,line))
+        {
+            break;
+        }
+
         if(line == "EXIT")
         {
             break;
         }
-        string result = RedisLite::executeCommand(line);
+        string result = executeCommand(line);
         cout << result <<"\n";
     }
 }
 
 string RedisLite::executeCommand(const string &line)
 {
-    DA<string> tokens = RedisLite::tokenize(line);
+    DA<string> tokens = tokenize(line);
     if(tokens.isEmpty())
     {
-        return "Wrong Command";
+        return "(error) Wrong Command";
     }
 
     string command = tokens[0];
 
     if(command == "SET")
     {   
-        return RedisLite::handleSet(tokens);
+        return handleSet(tokens);
     }
     else if(command == "GET")
     {
-        return RedisLite::handleGet(tokens);
+        return handleGet(tokens);
     }
     else if(command == "DEL")
     {
-        return RedisLite::handleDel(tokens);
+        return handleDel(tokens);
     }
-    else if(command == "Exists")
+    else if(command == "EXISTS")
     {
-        return RedisLite::handleExists(tokens);
+        return handleExists(tokens);
     }
-    else if(command == "Count")
+    else if(command == "COUNT")
     {
-        return RedisLite::handleCount();
+        return handleCount();
     }
-    else if(command == "Clear")
+    else if(command == "CLEAR")
     {
-        return RedisLite::handleClear();
+        return handleClear();
     }   
 
-    return "Wrong Command";
+    return "(error) Wrong Command";
 }
 
 DA<string> RedisLite::tokenize(const string &line)
@@ -84,30 +89,64 @@ DA<string> RedisLite::tokenize(const string &line)
 
 string RedisLite::handleSet(const DA<string> &tokens)
 {
-    return "Set";
+    if(tokens.size() != 3)
+    {
+        return "(error) Wrong number of arguments for set";
+    }
+    store.insert(tokens[1],tokens[2]);
+    return "Ok";
 }
 
 string RedisLite::handleGet(const DA<string> &tokens)
 {
-    return "Get";
+    if(tokens.size() != 2)
+    {
+        return "(error) Wrong number of arguments for GET";
+    }
+    if(store.contains(tokens[1]))
+    {
+        return store.get(tokens[1]);
+    }
+    else
+    {
+        return "Nill";
+    }
+    
 }
 
 string RedisLite::handleDel(const DA<string> &tokens)
 {
-    return "Del";
+    if(tokens.size() != 2)
+    {
+        return "(error) Wrong number of arguments for DEL";
+    }
+    if(store.remove(tokens[1]))
+    {
+        return "1";
+    }
+    return "0";
 }
 
 string RedisLite::handleExists(const DA<string> &tokens)
 {
-    return "Exists";
+    if(tokens.size() != 2)
+    {
+        return "(error) Wrong number of arguments for EXISTS";
+    }
+    if(store.contains(tokens[1]))
+    {
+        return "1";
+    }
+    return "0";
 }
 
 string RedisLite::handleCount()
 {
-    return "count";
+    return  to_string(store.size());
 }
 
 string RedisLite::handleClear()
 {
-    return "clear";
+    store.clear();
+    return "Ok";
 }
