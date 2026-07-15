@@ -30,7 +30,10 @@ HashMap<K,V,H>::HashMap(const HashMap<K,V,H>& other)
 
 template<typename K, typename V,typename H>
 HashMap<K,V,H>& HashMap<K,V,H>::operator=(const HashMap<K,V,H>& other)
-{
+{   
+    if(this == &other){
+        return *this;
+    }
     buckets = other.buckets;
     m_size = other.m_size;
     m_capacity = other.m_capacity;

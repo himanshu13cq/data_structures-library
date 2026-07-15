@@ -42,6 +42,16 @@ add_executable(unit_tests
             test/LinkedList/LLiterator_test.cpp
             test/LinkedList/LLcopy_test.cpp
             test/LinkedList/LLassignop_test.cpp
+
+            test/HashMap/HMinsert_test.cpp
+            test/HashMap/HMget_test.cpp
+            test/HashMap/HMcontain_test.cpp
+            test/HashMap/HMremove_test.cpp
+            test/HashMap/HMsize_test.cpp
+            test/HashMap/HMempty_test.cpp
+            test/HashMap/HMrehash_test.cpp
+            test/HashMap/HMcopy_test.cpp
+            test/HashMap/HMassignop_test.cpp
 )
 
 target_include_directories(unit_tests PRIVATE
