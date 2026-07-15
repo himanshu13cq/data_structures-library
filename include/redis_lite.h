@@ -12,7 +12,7 @@ class RedisLite
         RedisLite();
         void run();
 
-    private:
+    
         HashMap<std::string,std::string> store;
         std::string executeCommand(const std::string& line);
         DA<std::string> tokenize(const std::string& line);
@@ -24,6 +24,5 @@ class RedisLite
         std::string handleClear();
 };
 
-#include "redis_lite.tpp"
 #endif
 

@@ -34,6 +34,10 @@ string RedisLite::executeCommand(const string &line)
     }
 
     string command = tokens[0];
+    for(int i = 0;i < command.size(); ++i)
+    {
+        command[i] = toupper(command[i]);
+    }
 
     if(command == "SET")
     {   
