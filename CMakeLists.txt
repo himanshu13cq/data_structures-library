@@ -30,6 +30,18 @@ add_executable(unit_tests
             test/DynamicArray/DAcap_test.cpp
             test/DynamicArray/DAcopy_test.cpp
             test/DynamicArray/DA=_test.cpp
+
+            test/LinkedList/LLinsertfront_test.cpp
+            test/LinkedList/LLinsertback_test.cpp
+            test/LinkedList/LLinsert_test.cpp
+            test/LinkedList/LLdeletefront_test.cpp
+            test/LinkedList/LLdeleteval_test.cpp
+            test/LinkedList/LLdeleteat_test.cpp
+            test/LinkedList/LLfind_test.cpp
+            test/LinkedList/LLsize_test.cpp
+            test/LinkedList/LLiterator_test.cpp
+            test/LinkedList/LLcopy_test.cpp
+            test/LinkedList/LLassignop_test.cpp
 )
 
 target_include_directories(unit_tests PRIVATE

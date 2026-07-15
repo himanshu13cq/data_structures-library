@@ -152,7 +152,7 @@ T* LinkedList<T>::find(const T &value) const
 template<typename T>
 void LinkedList<T>::insert(int index,const T &value)
 {
-    if(index > m_size)
+    if(index > m_size || index < 0)
     {
         throw std::out_of_range("Entered Index is out of bounds");
     }
