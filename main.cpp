@@ -1,6 +1,7 @@
 #include "hash_map.h"
 #include "dynamic_array.h"
 #include <iostream>
+#include "redis_lite.h"
 using namespace std;
 
 class abc
@@ -37,22 +38,9 @@ struct point{
 
 int main()
 {   
-    point bita(10,34);
 
-    HashMap<point,int> hm2;
-    //HashMap<ad,ad,gemr.jwr
-    hm2.insert(bita,26);
-    cout << hm2.get(bita) <<endl;
-    /*HashMap<abc,int,abchasher> hm1;
-    abc alpha(10,20);
-    hm1.insert(alpha,899);
-    HashMap<int,int> hm;
-    cout << "created hash map ";
+    RedisLite app;
+    app.run();
 
-    for(int i = 0;i < 8; ++i)
-    {
-        hm.insert(i,i*10);
-    }
-    cout << hm.get(3) <<endl; */
-    return 0;
+
 }

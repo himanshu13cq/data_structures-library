@@ -6,7 +6,13 @@
 
 # Objective
 
-This is a revision of the original Linked List design proposal, written after the Hash Map's separate-chaining requirements exposed gaps in the original public API. The core objective is unchanged — understanding pointer-based, heap-allocated data structures and the Rule of Three — but the class now also needs to support being used as a **reusable building block for another data structure** (the Hash Map's buckets), which introduced two new requirements: searching/updating by value from outside the class, and read access to every element without exposing raw `Node` pointers.
+This is the second version of my LinkedList design proposal. I didn't originally plan to change the LinkedList API, but once I started designing the HashMap,I realized that the original interface wasn't enough.
+
+The main objective of LinkedList is still the same: to understand how pointer-based, heap-allocated data structures work and to correctly implement the Rule of Three. However, now the LinkedList also needs to work as a reusable building block for the HashMap.
+
+While designing the HashMap, I found two new requirements that my original LinkedList couldn't support. First, I needed a way to search for an element and update it directly if it already existed. Returning only a boolean from search() wasn't enough because I also needed access to the actual stored object. Second, during rehashing, I needed a way to visit every element in every bucket without exposing the internal Node pointers outside the class.
+
+Because of these new requirements, I revised the public API and added a few new features while keeping the internal implementation almost the same.
 
 ---
 
@@ -52,16 +58,23 @@ private:
 
 ### What changed from v1, and why
 
-- **`search()` was replaced with `find()`.** The original `bool search(const T& value) const` could only answer "does this value exist?" — it had no way to hand back *where* it was found. Once the Hash Map needed to update an existing key's value in place (rather than just check for existence), a boolean wasn't enough information. `find()` returns `T*` — a pointer directly into the matching node's data — so a caller can both check existence (`!= nullptr`) and modify the element through the returned pointer.
-- **`find()` returns a non-`const` `T*` even though the method is `const`.** `const` here is a promise about the *list structure* (head/tail/size won't change during the search) — it says nothing about the element itself. Returning a mutable pointer lets `HashMap::insert()` overwrite an existing value in place without needing a second, separate lookup.
-- **`deleteValue(const T& value)` is new.** `deleteAt(index)` only supports removal by position, but the Hash Map needs to remove an entry by *key*, without knowing (or caring about) its position in the bucket's chain. `deleteValue` searches for a matching element and removes it if found, reusing `deleteFront()` for the head case and a standard two-pointer (`prev`/`curr`) walk for every other position.
-- **`Iterator` (nested class) is new.** Before this, there was no way to read every element in a list from outside the class without exposing `Node<T>*` directly (which would break encapsulation — external code could then freely rewrite `next` pointers and corrupt the list). The Hash Map's `rehash()` needs to visit every entry in every bucket to relocate it into a bigger bucket array. `Iterator` wraps a `Node<T>*` and implements just the three operators (`*`, `++`, `!=`) required for C++'s range-based `for` loop, letting `rehash()` write `for(auto& kv : bucket) { ... }` instead of manually chasing `->next` pointers itself.
+In the first version, I had a search() function that returned only a boolean. At that time, it was enough because I only needed to know whether an element existed or not.
+
+Later, while designing the HashMap, I realized that this wasn't sufficient anymore. When inserting a key-value pair into the HashMap, I first need to check whether the key already exists. If it does, I don't want to insert another node—I simply want to update the existing value. Returning true or false doesn't tell me where that element is, so I replaced search() with find(), which returns a T*. Now I can both check whether an element exists (nullptr means it doesn't) and modify it directly if it does.
+
+Although find() is marked as const, it still returns a non-const pointer. The const here only means that searching should not modify the structure of the LinkedList itself. The list's head, tail, and size remain unchanged during the search. Returning a mutable pointer allows the HashMap to update an existing value without performing another lookup.
+
+I also added deleteValue(). Earlier, I only had deleteAt(index), but the HashMap never knows the position of an element inside a bucket. It only knows the key that should be removed. Because of that, removing by index wasn't useful for the HashMap, so I added deleteValue(), which searches for the element and removes it if it exists.
+
+Another important addition is the nested Iterator class. Before this, there was no safe way for another class to visit every element stored inside the LinkedList. One option was exposing the internal Node<T>*, but that would allow outside code to directly modify next pointers and potentially corrupt the list. Instead, I added a simple iterator that only supports dereferencing, moving to the next node, and comparison. This gives the HashMap everything it needs for rehashing while keeping the internal structure of the LinkedList hidden.
 
 ---
 
 ## Section 2 — Internal Representation
 
-Unchanged from v1: nodes are separately heap-allocated via `malloc` + placement-new, linked forward-only via `next`, with `head`/`tail`/`m_size` (renamed from `_size` for naming consistency with `HashMap` and `DynamicArray`) tracked as class fields.
+The internal representation remains almost the same as the first version. Each node is allocated separately on the heap using malloc and placement new. Every node stores the data and a pointer to the next node, while the LinkedList itself maintains head, tail, and m_size. I also renamed _size to m_size so the naming is consistent with the other data structures in the project.
+
+The iterator itself is very simple. Internally, it only stores a single Node<T>* representing the current position in the list.
 
 **`Iterator` internal representation:**
 ```cpp
@@ -75,9 +88,9 @@ public:
     bool operator!=(const Iterator& other) const { return current != other.current; }
 };
 ```
-An iterator is nothing more than a wrapper around "a position in the list" — here, a single `Node<T>*`. `begin()` returns `Iterator(head)`; `end()` returns `Iterator(nullptr)`, using the list's existing null-termination as a free sentinel for "one past the last element" rather than inventing separate bookkeeping.
+begin() simply returns an iterator pointing to head, while end() returns an iterator containing nullptr. Since the LinkedList already ends with a null pointer, I can reuse that as the "one past the last element" position instead of introducing another special marker.
 
-**`find()` and `deleteValue()` both rely on `T` supporting `operator==`.** Neither `LinkedList` nor `Node` define this — it's a requirement pushed onto whatever `T` is used for the list, deliberately kept that way so `LinkedList` itself stays fully generic and has no knowledge of what "equality" means for its stored type.
+Both find() and deleteValue() rely on operator== being available for the stored type T. The LinkedList itself doesn't define what equality means. Instead, it leaves that responsibility to the type stored inside the list, keeping the implementation completely generic.
 
 ![LinkedList Memory Layout](/docs/design/memory_diagram/linked_list.jpg)
 
@@ -95,14 +108,20 @@ An iterator is nothing more than a wrapper around "a position in the list" — h
 
 ## Section 4 — Design Decisions (additions)
 
-## Iterator Instead of an Exposed `getHead()`
+## Iterator Instead of an `getHead()` function
 
-An earlier option considered was simply exposing a `getHead()` accessor so external code (the Hash Map) could walk the chain itself using raw `Node<T>*` pointers. This was rejected: it would let any caller freely rewrite `next` pointers and corrupt the list's internal structure from outside the class. A minimal `Iterator` (supporting only read/advance/compare, not arbitrary pointer mutation) gives external code the ability to *visit* every element without the ability to *break* the list's invariants.
+When I started implementing the HashMap, one idea was to simply expose a getHead() function so the HashMap could walk through the LinkedList using raw Node<T>* pointers. Although this would have worked, I decided not to do it because it would expose the internal implementation of the LinkedList. Any external code could then directly modify the next pointers and accidentally corrupt the list.
+
+Instead, I implemented a simple Iterator. It still allows other classes to visit every element in the list, which is exactly what the HashMap needs during rehashing, but it keeps the internal nodes hidden. This way, the LinkedList remains encapsulated while still being reusable.
 
 ## `find()` Returns a Pointer, Not a Reference
 
-`T*` was chosen over `T&` specifically so "not found" has a natural representation: `nullptr`. A reference cannot be null, which would have forced an exception-based "not found" signal even for a simple internal helper used only by trusted, cooperating code (the Hash Map itself) — unnecessary overhead for a private-facing utility method.
+While designing the new API, I considered returning a reference from find(). However, a reference always has to refer to a valid object, so there would be no way to represent the case where the element doesn't exist.
+
+Returning a pointer makes this much simpler. If the element is found, find() returns a pointer to it. Otherwise, it returns nullptr. This also lets the HashMap directly update an existing value without performing another lookup.
 
 ## `deleteValue()` Reuses `deleteFront()` for the Head Case
 
-Removing the first node is structurally different from removing any other node — there is no "previous" node whose `next` pointer needs rewriting; instead `head` itself must move forward, and `tail` may also need resetting if the list becomes empty. Since `deleteFront()` already solves this correctly, `deleteValue()` delegates to it rather than duplicating that logic, keeping the "shrink from the front" edge case defined in exactly one place.
+When implementing deleteValue(), I noticed that deleting the first node is different from deleting any other node. In the head case, there is no previous node, and both head and tail may need to be updated if the list becomes empty.
+
+Since I had already implemented this logic correctly inside deleteFront(), I decided to reuse that function instead of writing the same code again. This avoids duplication and ensures that the head deletion logic only exists in one place, making it easier to maintain and less likely to introduce bugs later.

@@ -6,7 +6,9 @@
 
 # Objective
 
-This is a revision of the original Hash Map design proposal, written after implementation revealed several places where the original design was underspecified or needed to change once real code had to compile and run. The core objective — understanding hashing, collision handling, bucket management and resizing — is unchanged; this document fills in what the original left open: how buckets are actually represented, how a generic `Key` gets hashed at all, and how lookup/update/removal share logic.
+This is the second version of my Hash Map design proposal. After I started implementing the Hash Map, I realized that some parts of my original design were either incomplete or needed to change once I started writing the actual code.
+
+The main objective is still the same: to understand how hashing works, how collisions are handled, how buckets are managed, and how resizing is performed. However, during implementation I had to make several design decisions that were not covered in the first proposal. In this version, I have updated the design to explain how buckets are actually represented, how different key types are hashed, and how lookup, insertion, update, and removal share common logic instead of duplicating code.
 
 ---
 
@@ -49,13 +51,17 @@ private:
 
 ### What changed from v1, and why
 
-- **Buckets are `LinkedList<KV<Key,Value>>*`, not a custom `Bucket` type.** The original proposal described "buckets point to linked list objects" without specifying the concrete type. Rather than inventing a separate `Bucket` wrapper class, each bucket directly reuses the project's own `LinkedList<T>` — each bucket *is* a `LinkedList` whose element type happens to be a `KV` pair. This avoids duplicating chain-management logic (traversal, insertion, deletion) that `LinkedList` already implements and tests.
-- **A `KV` struct replaces the bare `Node<Key,Value>` described in v1.** The original proposal's `Node` combined "an element in a chain" with "a key-value pair" into one struct. Splitting them lets `LinkedList<T>`'s existing `Node<T>` handle the chain-linkage part generically, while `KV<Key,Value>` handles only the key-value pairing — `LinkedList<KV<Key,Value>>` composes the two rather than duplicating linked-list logic inside the Hash Map itself.
-- **`remove()` now returns `bool`, not `void`.** The original signature couldn't distinguish "the key was removed" from "the key was never there" — both looked identical to a caller. Returning whether removal actually happened lets calling code detect a no-op removal without a separate `contains()` check first.
-- **`get()` follows `operator[]`-style semantics, not `at()`-style.** The v1 proposal implied `get()` on a missing key was simply invalid/undefined. In the actual implementation, `get()` on a missing key inserts that key with a default-constructed `Value` and returns a reference to it — mirroring `std::map::operator[]` rather than `std::map::at()`. This was a deliberate trade during implementation: it keeps `get()` usable for both reading and "get-or-create" patterns without a second method, at the cost of requiring `Value` to be default-constructible and of silently creating entries on typos. **This is the one part of the original design intentionally not followed as originally written** — the original spec assumed exception-on-missing-key behavior.
-- **`hash()` only supports `int` and `std::string` keys, resolved at compile time via `if constexpr`.** The original proposal left "how does hash() work for an arbitrary Key type" unanswered. Since a truly generic hash (working for any possible `Key`) isn't something that can be written without either restricting `Key` or requiring the caller to supply their own hash function, the implementation currently branches on `Key`'s actual type at compile time and rejects anything else via `static_assert`, with a clear compiler error rather than a confusing one.
-- **`find()` is a new private helper, shared by `insert()`, `get()`, and `contains()`.** All three operations need the exact same first step — hash the key, locate the bucket, search its chain — so this logic lives in exactly one place instead of being duplicated three times.
+In my first proposal, I mentioned that each bucket would point to a linked list, but I never clearly defined what a bucket actually was. During implementation, I realized there was no need to create a separate Bucket class because I had already built a generic LinkedList<T>. Instead of writing another class that performs insertion, deletion, and traversal again, I simply made every bucket a LinkedList<KV<Key, Value>>. This allowed me to reuse code that was already implemented and tested.
 
+I also changed the way key-value pairs are stored. In the original proposal, I combined the linked list node and the key-value pair into a single structure. Later I realized that this duplicated responsibilities. The Node<T> inside LinkedList already manages the linked list structure, so I introduced a separate KV<Key, Value> structure whose only job is to store the key and value. This keeps both classes cleaner and more reusable.
+
+Another change was the remove() function. Earlier it returned void, but during implementation I realized that the caller has no way to know whether anything was actually removed. Returning a bool makes it possible to know if the key existed without having to call contains() first.
+
+I also changed the behavior of get(). My original design assumed that trying to access a missing key would simply be an error. While implementing it, I decided to follow the behavior of std::map::operator[] instead. Now, if a key doesn't exist, a default value is inserted automatically and a reference to it is returned. This makes the function useful for both reading and creating entries, although it also means that missing keys are silently created.
+
+Another problem I had to solve was hashing generic key types. In the original proposal, I simply wrote a hash() function without explaining how it would work for different types. During implementation, I decided to support only int and std::string keys for now. I used if constexpr to choose the correct hashing implementation at compile time and added a static_assert so unsupported key types produce a clear compiler error instead of confusing compilation failures.
+
+Finally, I noticed that insert(), get(), and contains() all started by performing exactly the same steps: hash the key, locate the correct bucket, and search inside the linked list. Instead of writing the same logic three times, I added a private find() helper that all three functions can reuse.
 ---
 
 # Section 2 — Internal Representation
@@ -129,12 +135,20 @@ When `m_size / m_capacity` exceeds a load factor of `0.9`, `insert()` triggers `
 
 ## Reusing `LinkedList` for Buckets Instead of a Custom Bucket Class
 
-Writing a separate `Bucket` class purely to wrap a chain of `KV` pairs would have duplicated logic (insertion, deletion, traversal) that `LinkedList<T>` already provides generically. Making each bucket a `LinkedList<KV<Key,Value>>` treats the Hash Map as *composed of* the project's own data structures rather than reimplementing chain management a second time — this is also why `LinkedList` gained a generic `Iterator` and `find()`/`deleteValue()` methods during this revision: they weren't originally needed until `LinkedList` had to serve double duty as a reusable bucket type.
+While designing the Hash Map, I thought about creating a separate Bucket class. However, I realized that it would mostly duplicate the work my LinkedList<T> already does. A bucket only needs to store multiple key-value pairs and support insertion, deletion, searching, and traversal. Since my LinkedList already provides all of these operations, creating another class didn't make much sense.
+
+Instead, I made every bucket a LinkedList<KV<Key, Value>>. This lets the Hash Map reuse the LinkedList implementation instead of maintaining two different classes that solve the same problem. This decision also led me to improve the LinkedList itself by adding Iterator, find(), and deleteValue(), making it reusable by other data structures as well.
 
 ## Restricting `hash()` to `int` and `std::string` For Now
 
-A fully generic hash function that works for *any* `Key` type isn't achievable without either requiring callers to supply their own hashing strategy (e.g. a template policy parameter) or restricting supported types. Given the project's current scope, restricting to `int` and `std::string` — resolved at compile time so unsupported types fail fast with a clear `static_assert` message — was chosen over the added complexity of a pluggable hashing policy, which remains a possible future extension.
+While implementing the hashing function, I realized that writing a truly generic hash function isn't as simple as I originally thought. Different types require different hashing strategies, and supporting every possible type would require users to provide their own hash function or use a more complex design.
+
+Since the goal of this project is to understand how a Hash Map works rather than build a complete STL replacement, I decided to support only int and std::string keys for now. Using if constexpr allows the correct hashing code to be selected at compile time, and unsupported types produce a clear compiler error using static_assert. This keeps the implementation simple while leaving room for future improvements.
 
 ## `get()`'s Insert-on-Missing-Key Behavior
 
-This is a deliberate deviation from the original design proposal (which assumed `get()` would throw or otherwise reject a missing key). Implementing `get()` to insert a default-constructed value on a miss — matching `std::map::operator[]` rather than `std::map::at()` — was chosen for simplicity, avoiding a separate exception-handling path for what is, in practice, a common "get or create" access pattern. The tradeoff, noted for future revisions: this makes it impossible to distinguish "the key existed with a default value" from "the key didn't exist and was just created," and a mistyped key silently creates a new entry rather than surfacing an error.
+My original design assumed that calling get() with a missing key should result in an error. While implementing the Hash Map, I realized that automatically creating the entry makes many common use cases much simpler.
+
+Because of this, I changed the behavior to match std::map::operator[]. If the key already exists, the stored value is returned. If it doesn't exist, a default-constructed value is inserted first, and then a reference to that value is returned.
+
+I know this also has a drawback because typing the wrong key will silently create a new entry instead of reporting an error. However, for this project I felt that the simpler interface was a better tradeoff, and this behavior can always be changed in a future version if needed.
